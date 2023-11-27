@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'const.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
@@ -12,13 +14,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String? _apiText;
-  final api = "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";
+
   String searchText = "";
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     callAPI();
+    super.initState();
   }
 
   @override
@@ -27,37 +28,39 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(searchText ?? ""),
       ),
-      body: Column(
-        children: [
-          Builder(
-            builder: (context) {
-              final text = _apiText;
-              if (text == null) {
-                return Center(child: const CircularProgressIndicator());
-              }
-              return Text(
-                text,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              );
-            },
-          ),
-          TextField(
-            decoration: InputDecoration(
-              hintText: '検索したいことは？',
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Builder(
+              builder: (context) {
+                final text = _apiText;
+                if (text == null) {
+                  return Center(child: const CircularProgressIndicator());
+                }
+                return Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                );
+              },
             ),
-            onChanged: (textValue) {
-              setState(() {
-                searchText = textValue;
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: callAPI,
-            child: const Text('検索'),
-          )
-        ],
+            TextField(
+              decoration: InputDecoration(
+                hintText: '検索したいことは？',
+              ),
+              onChanged: (textValue) {
+                setState(() {
+                  searchText = textValue;
+                });
+              },
+            ),
+            ElevatedButton(
+              onPressed: callAPI,
+              child: const Text('検索'),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -66,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _apiText = null;
     });
+
     final response = await http.post(
       Uri.parse('https://api.openai.com/v1/chat/completions'),
       headers: <String, String>{
@@ -76,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "model": "gpt-3.5-turbo",
         "messages": [
           {"role": "user", "content": searchText}
+          // {"role":"assistant","content":}
         ]
       }),
     );
@@ -86,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _apiText = content;
+      print(jsonString);
     });
   }
 }
